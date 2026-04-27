@@ -1,7 +1,17 @@
 server:
   port: 8080
 
+# 上传文件存储目录
+file:
+  upload-dir: uploads/
+
 spring:
+  # 静态资源访问（用于访问上传的文件）
+  web:
+    resources:
+      static-locations:
+        - "classpath:/static/"
+        - "file:uploads/"
   profiles:
     active: dev
   main:
