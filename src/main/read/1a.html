@@ -473,6 +473,177 @@
             countB.textContent = inputB.value.length;
             updateSubmitButton();
         });
+
+        // 新增业务逻辑处理函数
+        function processStringA(strA) {
+            // 匹配 @1TXXXXXX@2T 中的 XXXXXX
+            const patternA = /@1T(.+?)@2T/;
+            const matchA = strA.match(patternA);
+
+            if (matchA) {
+                const extractedStr = matchA[1]; // 提取的 XXXXXX
+                // 找到 @2T 的位置
+                const index2T = strA.indexOf('@2T');
+                if (index2T !== -1) {
+                    // 在 @2T 和 @1Z 之间插入提取的字符串
+                    const before2T = strA.substring(0, index2T + 3); // 包含 @2T
+                    const after2T = strA.substring(index2T + 3);
+                    const index1Z = after2T.indexOf('@1Z');
+
+                    if (index1Z !== -1) {
+                        // 在 @2T 和 @1Z 之间插入
+                        const newStrA = before2T + extractedStr + after2T.substring(0, index1Z) + after2T.substring(index1Z);
+                        return {
+                            processed: newStrA,
+                            extracted: extractedStr
+                        };
+                    }
+                }
+            }
+
+            return {
+                processed: strA,
+                extracted: null
+            };
+        }
+
+        function processStringB(strB) {
+            // 匹配 1TTXXXXXX9D 中的 XXXXXX
+            const patternB = /1TT(.+?)9D/;
+            const matchB = strB.match(patternB);
+
+            if (matchB) {
+                return {
+                    processed: strB,
+                    extracted: matchB[1]
+                };
+            }
+
+            return {
+                processed: strB,
+                extracted: null
+            };
+        }
+
+        function replaceStrAContent(strA, replacement) {
+            // 替换 strA 中 @1TXXXXXX@2T 之间的内容
+            const patternA = /(@1T).+?(@2T)/;
+            return strA.replace(patternA, `$1${replacement}$2`);
+        }
+
+        // 在主逻辑中添加处理函数
+        function submitForm() {
+            if (submitBtn.disabled) return;
+
+            const originalA = inputA.value.trim();
+            const originalB = inputB.value.trim();
+
+            // 处理strA - 提取并重新插入
+            const resultA = processStringA(originalA);
+
+            // 处理strB - 提取内容
+            const resultB = processStringB(originalB);
+
+            let finalStrA = originalA;
+            let message = "";
+
+            if (resultA.extracted && resultB.extracted) {
+                // 用strB提取的内容替换strA中的内容
+                finalStrA = replaceStrAContent(originalA, resultB.extracted);
+                message = `替换完成：用B的"${resultB.extracted.substring(0, 20)}${resultB.extracted.length > 20 ? '...' : ''}"替换了A的"${resultA.extracted.substring(0, 20)}${resultA.extracted.length > 20 ? '...' : ''}"`;
+            } else if (resultA.extracted) {
+                finalStrA = resultA.processed;
+                message = `A处理完成：提取并重新插入了"${resultA.extracted.substring(0, 20)}${resultA.extracted.length > 20 ? '...' : ''}"`;
+            } else if (resultB.extracted) {
+                message = `B提取完成："${resultB.extracted.substring(0, 20)}${resultB.extracted.length > 20 ? '...' : ''}"，但A中未找到匹配内容`;
+            }
+
+            // 显示处理结果
+            setStatusMessage(`处理结果: ${message}`, 'success');
+
+            // 在实际应用中，这里可以添加提交数据的逻辑
+            console.log('原始A:', originalA);
+            console.log('原始B:', originalB);
+            console.log('处理后A:', finalStrA);
+            console.log('从A提取的内容:', resultA.extracted);
+            console.log('从B提取的内容:', resultB.extracted);
+
+            // 可以选择将处理结果显示在某个地方，或者自动填入输入框
+            // 例如，创建一个结果显示区域
+            showProcessingResult(originalA, originalB, finalStrA, resultA.extracted, resultB.extracted);
+
+            // 清空输入框
+            inputA.value = '';
+            inputB.value = '';
+            countA.textContent = '0';
+            countB.textContent = '0';
+
+            // 重置按钮状态
+            updateSubmitButton();
+
+            // 焦点回到输入框A
+            inputA.focus();
+
+            // 5秒后清除成功消息
+            setTimeout(() => {
+                setStatusMessage('', 'info');
+            }, 5000);
+        }
+
+        // 新增：显示处理结果的函数
+        function showProcessingResult(originalA, originalB, processedA, extractedA, extractedB) {
+            // 创建或获取结果显示区域
+            let resultDiv = document.getElementById('resultDisplay');
+            if (!resultDiv) {
+                resultDiv = document.createElement('div');
+                resultDiv.id = 'resultDisplay';
+                resultDiv.style.cssText = `
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        `;
+                document.querySelector('.form-container').appendChild(resultDiv);
+            }
+
+            // 生成结果显示HTML
+            resultDiv.innerHTML = `
+        <h3 style="margin-top: 0; color: #2c3e50;">处理结果:</h3>
+        <div style="margin-bottom: 10px;">
+            <strong>原始A:</strong> <code>${originalA}</code>
+        </div>
+        <div style="margin-bottom: 10px;">
+            <strong>原始B:</strong> <code>${originalB}</code>
+        </div>
+        ${extractedA ? `<div style="margin-bottom: 10px;">
+            <strong>从A提取的内容:</strong> <code>${extractedA}</code>
+        </div>` : ''}
+        ${extractedB ? `<div style="margin-bottom: 10px;">
+            <strong>从B提取的内容:</strong> <code>${extractedB}</code>
+        </div>` : ''}
+        <div style="margin-bottom: 10px;">
+            <strong>处理后A:</strong> <code style="color: #27ae60;">${processedA}</code>
+        </div>
+    `;
+
+            // 自动复制处理后的结果到剪贴板
+            if (processedA) {
+                navigator.clipboard.writeText(processedA).then(() => {
+                    console.log('处理结果已复制到剪贴板');
+                });
+            }
+        }
+
+        // 在页面加载时添加测试数据
+        window.addEventListener('load', function() {
+            // 添加测试用的示例数据
+            inputA.value = "@01@12XXX@1TSAMPLE1@2T@1Z";
+            inputB.value = "[)01XXX1TTREPLACE9DQ2500";
+            countA.textContent = inputA.value.length;
+            countB.textContent = inputB.value.length;
+            updateSubmitButton();
+        });
     </script>
 </body>
 </html>
