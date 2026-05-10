@@ -117,4 +117,93 @@ public class JsonUtil {
     public static Boolean getBoolean(JsonNode node, String field) {
         return node.has(field) && !node.get(field).isNull() ? node.get(field).asBoolean() : null;
     }
+
+
+
+
+    private static int findIndexContaining(List<String> list, String keyword) {
+        // 1. 精确匹配
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).contains(keyword)) {
+                return i;
+            }
+        }
+
+        // 2. 模糊匹配（相似度>50%）
+        for (int i = 0; i < list.size(); i++) {
+            if (calculateSimilarity(list.get(i), keyword) > 0.5) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
+    public class StringUtils {
+
+        // 第一页的方法
+        private static int findIndexContaining(List<String> list, String keyword) {
+            // 1. 精确匹配
+            for (int i = 0; i < list.size(); i++) {
+                if (list.get(i).contains(keyword)) {
+                    return i;
+                }
+            }
+
+            // 2. 模糊匹配（相似度>50%）
+            for (int i = 0; i < list.size(); i++) {
+                if (calculateSimilarity(list.get(i), keyword) > 0.5) {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        // 第二页的方法
+        private static double calculateSimilarity(String a, String b) {
+            // C# string.IsNullOrEmpty 对应 Java 的 isEmpty() 需要先判空
+            if (a == null || a.isEmpty() || b == null || b.isEmpty()) {
+                return 0;
+            }
+
+            int maxLen = Math.max(a.length(), b.length());
+            if (maxLen == 0) return 1.0;
+
+            int sameCount = 0;
+            int minLen = Math.min(a.length(), b.length());
+
+            // 计算相同字符数（逐位比较）
+            for (int i = 0; i < minLen; i++) {
+                if (a.charAt(i) == b.charAt(i)) {
+                    sameCount++;
+                }
+            }
+
+            return (double) sameCount / maxLen;
+        }
+
+        // 纯数字检查：^\\d+$
+        private static boolean isPureNumber(String text) {
+            if (text == null) return false;
+            return Pattern.matches("^\\d+$", text);
+        }
+
+        // 日期模式检查：^\\d{4}\\.\\d{2}\\.\\d{2}$
+        private static boolean isDatePattern(String text) {
+            if (text == null) return false;
+            return Pattern.matches("^\\d{4}\\.\\d{2}\\.\\d{2}$", text);
+        }
+
+        // 有效日期检查
+        private static boolean isValidDate(String text) {
+            return isDatePattern(text);
+        }
+    }
+
+
 }
