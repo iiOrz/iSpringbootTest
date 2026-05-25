@@ -7,7 +7,7 @@ CREATE TABLE label_print_process_flow (
                                           type TINYINT NOT NULL,
                                           part_no NVARCHAR(100) NULL,
                                           origin_part_no NVARCHAR(100) NULL,
-                                          uaes_part_no NVARCHAR(100) NULL,
+                                          uaeess_part_no NVARCHAR(100) NULL,
                                           status TINYINT NOT NULL DEFAULT 0,
                                           start_time DATETIME2(0) NOT NULL,
                                           end_time DATETIME2(0) NULL,
@@ -27,11 +27,11 @@ EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'流程编号�
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'流程分类：1-主数据导入；2-摄像头识别；3-扫描枪识别', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'label_print_process_flow', @level2type=N'COLUMN', @level2name=N'type';
 GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'(CATL)料号', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'label_print_process_flow', @level2type=N'COLUMN', @level2name=N'part_no';
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'(CAT)料号', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'label_print_process_flow', @level2type=N'COLUMN', @level2name=N'part_no';
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'原厂料号', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'label_print_process_flow', @level2type=N'COLUMN', @level2name=N'origin_part_no';
 GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'最终生成的UAES料号（成功后写入，失败则为NULL）', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'label_print_process_flow', @level2type=N'COLUMN', @level2name=N'uaes_part_no';
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'最终生成的uaeess料号（成功后写入，失败则为NULL）', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'label_print_process_flow', @level2type=N'COLUMN', @level2name=N'uaeess_part_no';
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'流程整体状态：0-进行中，1-成功，2-失败', @level0type=N'SCHEMA', @level0name=N'dbo', @level1type=N'TABLE', @level1name=N'label_print_process_flow', @level2type=N'COLUMN', @level2name=N'status';
 GO
@@ -48,7 +48,7 @@ GO
 
 -- 索引
 CREATE UNIQUE NONCLUSTERED INDEX uk_flow_no ON label_print_process_flow(flow_no);
-CREATE NONCLUSTERED INDEX idx_uaes_part_no ON label_print_process_flow(uaes_part_no);
+CREATE NONCLUSTERED INDEX idx_uaeess_part_no ON label_print_process_flow(uaeess_part_no);
 CREATE NONCLUSTERED INDEX idx_type ON label_print_process_flow(type);
 CREATE NONCLUSTERED INDEX idx_status ON label_print_process_flow(status);
 GO
